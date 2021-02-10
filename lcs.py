@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import math
 import random
+
 
 def makeInitialPop(short, populationSize):
     population = []
@@ -16,6 +19,7 @@ def makeInitialPop(short, populationSize):
             print("Woah no posers brah. You gotta be unique to join our crew!")
     return population
 
+
 def roulette(short, longo, population):
     popFitness = []
     totalFitness = 0
@@ -24,6 +28,7 @@ def roulette(short, longo, population):
         popFitness.append(specFit)
         totalFitness += specFit
         #not finished
+
 
 def fitness(short, longo, binary):
     candidate = ""
@@ -63,6 +68,30 @@ def fitness(short, longo, binary):
         fitnessRating = 1
     print("Candidate: ", candidate,"Fitness: ", fitnessRating)
     print("###################################################")
+
+
+def ga(pool):
+    n = 1000
+    rand = random.random() * n
+    if rand < (n * 0.95):
+        crossover()
+    else:
+        reproduce()
+    return
+
+
+def crossover():
+    return
+
+
+def reproduce():
+    return
+
+
+def mutate():
+    return
+
+
 def main():
     populationSize = 500
     short = "president"
@@ -74,9 +103,11 @@ def main():
     # print("##########################################")
     # testBin = "110111111"
     #fitness(short, longo, testBin)
-    # population = makeInitialPop(short, populationSize)
+    population = makeInitialPop(short, populationSize)
     # for x in population:
     #    fitness(short, longo, x)
+
+    ga(population)
 
     # print("##########################################")
 
