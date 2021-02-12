@@ -2,9 +2,14 @@ import math
 import random
 
 def makeInitialPop(short, populationSize):
+    tempper = pow(2,len(short))
+    if populationSize > tempper:
+        print("It is impossible to create ", populationSize, " unique binary variations of a word that is ", len(short), "characters long.")
+        return
     population = []
     temp = ""
-    for x in range(populationSize):
+    while len(population) < populationSize:
+    #for x in range(populationSize):
         temp = ""
         for index in range(len(short)):
             gen = random.randint(0,1)
@@ -12,18 +17,36 @@ def makeInitialPop(short, populationSize):
         if temp not in population:
             population.append(temp)
             print(temp)
-        else:
-            print("Woah no posers brah. You gotta be unique to join our crew!")
+        #else:
+
+            #print("Woah no posers brah. You gotta be unique to join our crew!")
     return population
 
-def roulette(short, longo, population):
+def roulette(short, longo, population, size):
     popFitness = []
+    finalPop = []
     totalFitness = 0
     for speci in population:
         specFit = fitness(short, longo, speci)
-        popFitness.append(specFit)
+        popFitness.append(specFit + totalFitness)
         totalFitness += specFit
         #not finished
+    while len(finalPop) < size:
+        gen = random.randint(0,totalFitness)
+        found = False
+        cur = 0
+        while not found:
+            #print(cur)
+            if cur >= size:
+                break
+            if popFitness[cur] <= gen:
+                finalPop.append(population[cur])
+                found = True
+            else:
+                cur += 1
+
+
+    return finalPop
 
 def fitness(short, longo, binary):
     candidate = ""
@@ -55,16 +78,18 @@ def fitness(short, longo, binary):
             break
 
 
-    print("Match: ", match)
+    #print("Match: ", match)
     fitnessRating = match + (match * numOfOnes) - ((numOfOnes - match))
     if match == numOfOnes:
         fitnessRating *= 2
     if fitnessRating <= 0:
         fitnessRating = 1
-    print("Candidate: ", candidate,"Fitness: ", fitnessRating)
-    print("###################################################")
+
+    #print("Candidate: ", candidate,"Fitness: ", fitnessRating)
+    #print("###################################################")
+    return fitnessRating
 def main():
-    populationSize = 500
+    populationSize = 100
     short = "president"
     longo = "providence"
     # tester = "prsident"
@@ -73,11 +98,11 @@ def main():
     # fitness("president", "providence", "110011111") #prident
     # print("##########################################")
     # testBin = "110111111"
-    #fitness(short, longo, testBin)
-    # population = makeInitialPop(short, populationSize)
-    # for x in population:
-    #    fitness(short, longo, x)
-
+    # fitness(short, longo, testBin)
+    population = makeInitialPop(short, populationSize)
+    print(len(population), "---Pop size")
+    finalPop = roulette(short, longo, population,populationSize-10)
+    print(len(finalPop), "---Final Pop size")
     # print("##########################################")
 
     # fitness("president", "providence", "100000101") #pet
