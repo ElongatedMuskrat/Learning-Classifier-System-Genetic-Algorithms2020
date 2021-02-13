@@ -71,17 +71,46 @@ def fitness(short, longo, binary):
 
 
 def ga(pool):
+    pop = []
+    for i in range(10):
+        pop.append(pool[i])
+    print(pop)
+    print(len(pool)/2)
+
     n = 1000
     rand = random.random() * n
     if rand < (n * 0.95):
-        crossover()
+        return crossover(pop)
     else:
         reproduce()
-    return
+        return None
 
 
-def crossover():
-    return
+def crossover(pool):
+    for i in range(0, len(pool), 2):
+        point = random.randint(0, 9)
+        print(point)
+
+        parent1 = pool[i]
+        parent2 = pool[i+1]
+
+        sub1 = parent1[point:]
+        parent1 = parent1[:point]
+        sub2 = parent2[point:]
+        parent2 = parent2[:point]
+        print(f"{parent1} : {sub1}")
+        print(f"{parent2} : {sub2}")
+        parent1 += sub2
+        parent2 += sub1
+
+        pool[i] = parent1
+        pool[i+1] = parent2
+
+    for i in pool:
+        # print(i)
+        parseBinary('president', i)
+
+    return pool
 
 
 def reproduce():
@@ -90,6 +119,19 @@ def reproduce():
 
 def mutate():
     return
+
+
+def parseBinary(origin, binary):
+    word = ""
+    for i, c in enumerate(binary):
+        if c == '1':
+            word += origin[i]
+    print(word)
+
+
+def isLcs(str1, str2):
+    it = iter(str2)
+    return all(c in it for c in str1)
 
 
 def main():
@@ -106,8 +148,25 @@ def main():
     population = makeInitialPop(short, populationSize)
     # for x in population:
     #    fitness(short, longo, x)
+    
+    for i, binary in enumerate(population):
+        parseBinary('president', binary)
+        if i == 10:
+            break
+        
+    print('=============================')
+    while True:
+        candidates = []
+        population = ga(population)
+        print('=============================')
+        for i in population:
+            
+            parseBinary('president', i)
+        
+        # input("\npress enter\n")
+        break
 
-    ga(population)
+    print(isLcs('it','thigh'))
 
     # print("##########################################")
 
