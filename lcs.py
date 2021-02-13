@@ -97,11 +97,6 @@ def fitness(short, longo, binary):
 
 
 def ga(pool):
-    # pop = []
-    # for i in range(10):
-    #     pop.append(pool[i])
-    # print(pop)
-    # print(len(pool)/2)
     pop = pool
 
     n = 1000
@@ -133,10 +128,6 @@ def crossover(pool):
         pool[i] = parent1
         pool[i+1] = parent2
 
-    # for i in pool:
-    #     # print(i)
-    #     parseBinary('president', i)
-
     return pool
 
 
@@ -164,12 +155,6 @@ def filterPopulation(pool, short, longo):
         decodedList.append(parseBinary(short, x))
     # grab the items that are sub sequences
     [filteredResult.append(x) for x in decodedList if isLcs(x, longo)]
-    
-    # print(f'filtered result : {len(filteredResult)}')
-
-    # printList(result)
-    # decodeList("president", filteredResult)
-    # print(filteredResult)    
 
     return filteredResult
 
@@ -216,8 +201,6 @@ def main():
         print('=============================')
         candidates = filterPopulation(population, short, longo)
         printList(candidates)
-        # for i in population:            
-        #     parseBinary('president', i)
         
         action = input("\npress enter to continue\nor\n'q' to quit\n")
         if (action == 'q'):
