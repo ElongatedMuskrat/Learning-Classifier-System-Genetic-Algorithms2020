@@ -34,16 +34,18 @@ def roulette(short, longo, population, size):
         specFit = fitness(short, longo, speci)
         popFitness.append(specFit + totalFitness)
         totalFitness += specFit
+    
         #not finished
     while len(finalPop) < size:
         gen = random.randint(0,totalFitness)
         found = False
         cur = 0
-        while not found:
+        while found == False:
             #print(cur)
+
             if cur >= size:
                 break
-            if popFitness[cur] <= gen:
+            if popFitness[cur] <= gen and population[cur] not in finalPop:
                 finalPop.append(population[cur])
                 found = True
             else:
@@ -190,6 +192,8 @@ def main():
     print(len(population), "---Pop size")
     finalPop = roulette(short, longo, population,populationSize-10)
     print(len(finalPop), "---Final Pop size")
+    # for x in finalPop:
+    #     print(x)
     
     # for i, binary in enumerate(finalPop):
     #     parseBinary('president', binary)
