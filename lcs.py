@@ -5,9 +5,14 @@ import random
 
 
 def makeInitialPop(short, populationSize):
+    tempper = pow(2,len(short))
+    if populationSize > tempper:
+        print("It is impossible to create ", populationSize, " unique binary variations of a word that is ", len(short), "characters long.")
+        return
     population = []
     temp = ""
-    for x in range(populationSize):
+    while len(population) < populationSize:
+    #for x in range(populationSize):
         temp = ""
         for index in range(len(short)):
             gen = random.randint(0,1)
@@ -15,19 +20,37 @@ def makeInitialPop(short, populationSize):
         if temp not in population:
             population.append(temp)
             print(temp)
-        else:
-            print("Woah no posers brah. You gotta be unique to join our crew!")
+        #else:
+
+            #print("Woah no posers brah. You gotta be unique to join our crew!")
     return population
 
 
-def roulette(short, longo, population):
+def roulette(short, longo, population, size):
     popFitness = []
+    finalPop = []
     totalFitness = 0
     for speci in population:
         specFit = fitness(short, longo, speci)
-        popFitness.append(specFit)
+        popFitness.append(specFit + totalFitness)
         totalFitness += specFit
         #not finished
+    while len(finalPop) < size:
+        gen = random.randint(0,totalFitness)
+        found = False
+        cur = 0
+        while not found:
+            #print(cur)
+            if cur >= size:
+                break
+            if popFitness[cur] <= gen:
+                finalPop.append(population[cur])
+                found = True
+            else:
+                cur += 1
+
+
+    return finalPop
 
 
 def fitness(short, longo, binary):
@@ -60,22 +83,26 @@ def fitness(short, longo, binary):
             break
 
 
-    print("Match: ", match)
+    #print("Match: ", match)
     fitnessRating = match + (match * numOfOnes) - ((numOfOnes - match))
     if match == numOfOnes:
         fitnessRating *= 2
     if fitnessRating <= 0:
         fitnessRating = 1
+
+
     print("Candidate: ", candidate,"Fitness: ", fitnessRating)
-    print("###################################################")
+    print("###################################################")    
+    return fitnessRating
 
 
 def ga(pool):
-    pop = []
-    for i in range(10):
-        pop.append(pool[i])
-    print(pop)
-    print(len(pool)/2)
+    # pop = []
+    # for i in range(10):
+    #     pop.append(pool[i])
+    # print(pop)
+    # print(len(pool)/2)
+    pop = pool
 
     n = 1000
     rand = random.random() * n
@@ -83,13 +110,13 @@ def ga(pool):
         return crossover(pop)
     else:
         reproduce()
-        return None
+        return pool
 
 
 def crossover(pool):
     for i in range(0, len(pool), 2):
         point = random.randint(0, 9)
-        print(point)
+        # print(point)
 
         parent1 = pool[i]
         parent2 = pool[i+1]
@@ -98,17 +125,17 @@ def crossover(pool):
         parent1 = parent1[:point]
         sub2 = parent2[point:]
         parent2 = parent2[:point]
-        print(f"{parent1} : {sub1}")
-        print(f"{parent2} : {sub2}")
+        # print(f"{parent1} : {sub1}")
+        # print(f"{parent2} : {sub2}")
         parent1 += sub2
         parent2 += sub1
 
         pool[i] = parent1
         pool[i+1] = parent2
 
-    for i in pool:
-        # print(i)
-        parseBinary('president', i)
+    # for i in pool:
+    #     # print(i)
+    #     parseBinary('president', i)
 
     return pool
 
@@ -121,21 +148,49 @@ def mutate():
     return
 
 
+def printList(li):
+    for i in li:
+        print(i)
+
+
+def filterPopulation(pool, short, longo):
+    result = []
+    decodedList = []
+    filteredResult = []
+    # remove duplicates
+    [result.append(x) for x in pool if x not in result]
+    # decode the binary strings in the list to "words"
+    for x in result:
+        decodedList.append(parseBinary(short, x))
+    # grab the items that are sub sequences
+    [filteredResult.append(x) for x in decodedList if isLcs(x, longo)]
+    
+    # print(f'filtered result : {len(filteredResult)}')
+
+    # printList(result)
+    # decodeList("president", filteredResult)
+    # print(filteredResult)    
+
+    return filteredResult
+
+
+# decode the binary string based on the origin word
 def parseBinary(origin, binary):
     word = ""
     for i, c in enumerate(binary):
         if c == '1':
             word += origin[i]
-    print(word)
+    return word
 
 
+# Determine whether or not str1 is a subsequence of str2
 def isLcs(str1, str2):
     it = iter(str2)
     return all(c in it for c in str1)
-
+    
 
 def main():
-    populationSize = 500
+    populationSize = 100
     short = "president"
     longo = "providence"
     # tester = "prsident"
@@ -145,29 +200,28 @@ def main():
     # print("##########################################")
     # testBin = "110111111"
     #fitness(short, longo, testBin)
+    # fitness(short, longo, testBin)
     population = makeInitialPop(short, populationSize)
-    # for x in population:
-    #    fitness(short, longo, x)
+    print(len(population), "---Pop size")
+    finalPop = roulette(short, longo, population,populationSize-10)
+    print(len(finalPop), "---Final Pop size")
     
-    for i, binary in enumerate(population):
-        parseBinary('president', binary)
-        if i == 10:
-            break
+    # for i, binary in enumerate(finalPop):
+    #     parseBinary('president', binary)
         
     print('=============================')
     while True:
         candidates = []
         population = ga(population)
         print('=============================')
-        for i in population:
-            
-            parseBinary('president', i)
+        candidates = filterPopulation(population, short, longo)
+        printList(candidates)
+        # for i in population:            
+        #     parseBinary('president', i)
         
-        # input("\npress enter\n")
-        break
-
-    print(isLcs('it','thigh'))
-
+        action = input("\npress enter to continue\nor\n'q' to quit\n")
+        if (action == 'q'):
+            break
     # print("##########################################")
 
     # fitness("president", "providence", "100000101") #pet
