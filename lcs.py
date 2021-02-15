@@ -98,22 +98,20 @@ def fitness(short, longo, binary):
     return fitnessRating
 
 
-def ga(pool):
+def ga(pool, k):
     pop = pool
-
     n = 1000
     rand = random.random() * n
     if rand < (n * 0.95):
-        return crossover(pop)
+        return crossover(pop, k)
     else:
-        reproduce()
+        print("Reproducing")
         return pool
 
 
-def crossover(pool):
+def crossover(pool, k):
     for i in range(0, len(pool), 2):
         point = random.randint(0, 9)
-        # print(point)
 
         parent1 = pool[i]
         parent2 = pool[i+1]
@@ -130,22 +128,35 @@ def crossover(pool):
         pool[i] = parent1
         pool[i+1] = parent2
 
+        if random.random() * k < 1 / k:
+            print("Mutating")
+            pool[i] = mutate(pool[i])
+            pool[i+1] = mutate(pool[i+1])
+
     return pool
 
 
-def reproduce():
-    return
-
-
-def mutate():
-    return
-
+def mutate(bin):
+    if bin != '':
+        word = ""
+        li = []
+        li[:] = bin
+        rand = random.randint(0, len(bin) - 1)
+        if bin[rand] == '0':
+            li[rand] = '1'
+        elif bin[rand] == '1':
+            li[rand] = '0'
+        word.join(li)
+        
+        return word
+    return bin
 
 def printList(li):
     for i in li:
         print(i)
 
 
+# filter out valid sub sequences
 def filterPopulation(pool, short, longo):
     result = []
     decodedList = []
@@ -155,7 +166,7 @@ def filterPopulation(pool, short, longo):
     # decode the binary strings in the list to "words"
     for x in result:
         decodedList.append(parseBinary(short, x))
-    # grab the items that are sub sequences
+    # grab the only items that are sub sequences
     [filteredResult.append(x) for x in decodedList if isLcs(x, longo)]
 
     return filteredResult
@@ -180,44 +191,49 @@ def main():
     populationSize = 100
     short = "president"
     longo = "providence"
-    # tester = "prsident"
-    # fitness("president", "providence", "110011110") #priden
-    # print("##########################################")
-    # fitness("president", "providence", "110011111") #prident
-    # print("##########################################")
-    # testBin = "110111111"
-    #fitness(short, longo, testBin)
-    # fitness(short, longo, testBin)
+    seq = ""
+    generation = 0
+    found = 0
+    identical = 0
+    k = len(short)
+    
     population = makeInitialPop(short, populationSize)
     print(len(population), "---Pop size")
     finalPop = roulette(short, longo, population,populationSize-10)
     print(len(finalPop), "---Final Pop size")
-    # for x in finalPop:
-    #     print(x)
-    
-    # for i, binary in enumerate(finalPop):
-    #     parseBinary('president', binary)
-        
-    print('=============================')
+
     while True:
         candidates = []
-        population = ga(population)
-        print('=============================')
-        candidates = filterPopulation(population, short, longo)
-        printList(candidates)
-        
-        action = input("\npress enter to continue\nor\n'q' to quit\n")
-        if (action == 'q'):
-            break
-    # print("##########################################")
+        finalPop = ga(finalPop, k)
+        candidates = filterPopulation(finalPop, short, longo)
 
-    # fitness("president", "providence", "100000101") #pet
-    # print("##########################################")
-    # fitness("president", "providence", "001100001") #
-    # print("##########################################")
-    # fitness("sourapple", "googleappstore", "010010101") #
-    # print("##########################################")
-    # fitness("sourapple", "googleappstore", "111111111") #
+        ### uncomment to view each generations possible lcs
+        # printList(candidates)
+        identical += 1
+
+        for x in candidates:
+            if len(x) > len(seq):
+                seq = x
+                identical = 0   
+        if identical == 0:
+            found = generation
+        generation += 1
+        
+        print("**************************")
+        print(f"\nfittest: {seq}")
+        print(f"found in G: {found}")
+        print(f"current G: {generation}")
+        print("**************************")
+
+        # if the same lcs stays for more than 10 generations, end the program
+        if identical > 10:
+            break
+
+        ### uncomment for manual control
+        # action = input("\npress enter to continue\nor\n'q' to quit\n")
+        # if (action == 'q'):
+        #     break
+
 
 if __name__ == '__main__':
   main()
