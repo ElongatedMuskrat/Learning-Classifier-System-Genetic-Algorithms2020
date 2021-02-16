@@ -19,10 +19,11 @@ def makeInitialPop(short, populationSize):
             temp += str(gen)
         if temp not in population:
             population.append(temp)
-            print(temp)
+            #print(temp)
         #else:
 
             #print("Woah no posers brah. You gotta be unique to join our crew!")
+
     return population
 
 
@@ -34,7 +35,7 @@ def roulette(short, longo, population, size):
         specFit = fitness(short, longo, speci)
         popFitness.append(specFit + totalFitness)
         totalFitness += specFit
-    
+
         #not finished
     while len(finalPop) < size:
         gen = random.randint(0,totalFitness)
@@ -45,7 +46,8 @@ def roulette(short, longo, population, size):
 
             if cur >= size:
                 break
-            if popFitness[cur] <= gen and population[cur] not in finalPop:
+            if gen <= popFitness[cur]: #and population[cur] not in finalPop:
+                #print("fitness at cur: ", popFitness[cur], " Random Gen:", gen)
                 finalPop.append(population[cur])
                 found = True
             else:
@@ -86,27 +88,45 @@ def fitness(short, longo, binary):
 
 
     #print("Match: ", match)
-    fitnessRating = match + (match * numOfOnes) - ((numOfOnes - match))
-    if match == numOfOnes:
-        fitnessRating *= 2
+    fitnessRating = 3*match + (match * numOfOnes) - (5*(numOfOnes - match))
+    #fitnessRating = match + (match * numOfOnes) - (numOfOnes - match)*2
+    if numOfOnes > match:
+        fitnessRating = math.floor(fitnessRating* .25)
     if fitnessRating <= 0:
         fitnessRating = 1
-
-
-    print("Candidate: ", candidate,"Fitness: ", fitnessRating)
-    print("###################################################")    
+    if isLcs(short,candidate):
+        fitnessRating *= 3
+    else:
+        fitnessRating = math.floor(fitnessRating * .25)
     return fitnessRating
 
 
 def ga(pool, k):
     pop = pool
+    crossPop = []
+    repoPop = []
     n = 1000
-    rand = random.random() * n
-    if rand < (n * 0.95):
-        return crossover(pop, k)
-    else:
-        print("Reproducing")
-        return pool
+    t = 0
+
+    for x in pool:
+        rand = random.random() * n
+        if rand < (n * 0.97):
+            crossPop.append(x)
+        else:
+            crossPop.append(x)
+            repoPop.append(x)
+            #print("Reproducing")
+    #print("crossPop len", len(crossPop), "len of repoPop", len(repoPop))
+
+    # if len(crossPop)%2 != 0:
+    #     t = len(repoPop) -1
+    #     crossPop.append(repoPop[t])
+    #     repoPop.pop()
+    crossPop = crossover(crossPop, k)
+    crossPop.extend(repoPop)
+
+    #print("New Pop Len: ",len(crossPop))
+    return crossPop
 
 
 def crossover(pool, k):
@@ -128,13 +148,12 @@ def crossover(pool, k):
         pool[i] = parent1
         pool[i+1] = parent2
 
-        if random.random() * k < 1 / k:
-            print("Mutating")
+        if random.random() * k < 1 / k: #pm = 1/k
+        #    print("Mutating")
             pool[i] = mutate(pool[i])
             pool[i+1] = mutate(pool[i+1])
 
     return pool
-
 
 def mutate(bin):
     if bin != '':
@@ -147,7 +166,7 @@ def mutate(bin):
         elif bin[rand] == '1':
             li[rand] = '0'
         word.join(li)
-        
+
         return word
     return bin
 
@@ -155,19 +174,18 @@ def printList(li):
     for i in li:
         print(i)
 
-
 # filter out valid sub sequences
 def filterPopulation(pool, short, longo):
     result = []
     decodedList = []
     filteredResult = []
     # remove duplicates
-    [result.append(x) for x in pool if x not in result]
+    [result.append(x) for x in pool]# if x not in result]
     # decode the binary strings in the list to "words"
     for x in result:
         decodedList.append(parseBinary(short, x))
     # grab the only items that are sub sequences
-    [filteredResult.append(x) for x in decodedList if isLcs(x, longo)]
+    [filteredResult.append(x) for x in decodedList]# if isLcs(x, longo)]
 
     return filteredResult
 
@@ -179,57 +197,77 @@ def parseBinary(origin, binary):
         if c == '1':
             word += origin[i]
     return word
-
-
 # Determine whether or not str1 is a subsequence of str2
 def isLcs(str1, str2):
     it = iter(str2)
     return all(c in it for c in str1)
-    
 
 def main():
-    populationSize = 100
-    short = "president"
-    longo = "providence"
+    populationSize = 120
+    maxGens = 200
+
+    # different trials commented out
+    # short = "president"
+    # longo = "providence"
+
+    # short = "tcaatacgtaagggtactcgtagaagaaacacacgcggtagcgtctgagattggagtggggttgggagat" #70 chars
+    # longo = "tttgtaagggagggtcgagaaatataaggcaaatagtagctggccataatcagagccataaattggtaaggaaagattttttt" #80 chars
+
+    # short = "helpmepleasehelpyoung"
+    # longo = "Help!IneedsomebodyHelp!NotjustanybodyHelp!YouknowIneedsomeoneHelp!(When)WhenIwasyounger(WhenIwasyoung)somuchyoungerthantodayIneverneedIneverneededanybody'shelpinanyway"
+
+    # short = "thebigbluestorewasfilledwithbees"
+    # longo = "somebodyoncetoldmetheworldwasgonnarollmeiaintthesharpesttoolintheshed"
+
+    # short = "myStationaryfig"
+    # longo = "blastatgppppmmmmioneryfunimag"
+
+    short = "thebluelagoon"
+    longo = "theodoreisgreenandbluebutnotmaroon"
+
+    short = short.lower()
+    longo = longo.lower()
     seq = ""
     generation = 0
     found = 0
     identical = 0
     k = len(short)
-    
-    population = makeInitialPop(short, populationSize)
-    print(len(population), "---Pop size")
-    finalPop = roulette(short, longo, population,populationSize-10)
-    print(len(finalPop), "---Final Pop size")
 
+    population = makeInitialPop(short, populationSize)
+    #print(len(population), "---Pop size")
+    finalPop = roulette(short, longo, population,populationSize-10)
+    # for x in finalPop:
+    #     print(x,"\n")
+    ##################################
     while True:
         candidates = []
+        finalPop = roulette(short, longo,finalPop , (populationSize - 10))
         finalPop = ga(finalPop, k)
         candidates = filterPopulation(finalPop, short, longo)
-
+        #print(" ----- size of pop:", len(candidates))
         ### uncomment to view each generations possible lcs
-        # printList(candidates)
+        #printList(candidates)
         identical += 1
 
         for x in candidates:
             if len(x) > len(seq):
                 seq = x
-                identical = 0   
+                identical = 0
         if identical == 0:
             found = generation
         generation += 1
-        
-        print("**************************")
-        print(f"\nfittest: {seq}")
-        print(f"found in G: {found}")
-        print(f"current G: {generation}")
-        print("**************************")
+
 
         # if the same lcs stays for more than 10 generations, end the program
-        if identical > 10:
+        if generation > maxGens: #identical > 10:
+            print("**************************")
+            print(f"\nfittest: {seq}")
+            print(f"found in G: {found}")
+            print(f"current G: {generation}")
+            print("**************************")
             break
-
-        ### uncomment for manual control
+##########################333
+        ## uncomment for manual control
         # action = input("\npress enter to continue\nor\n'q' to quit\n")
         # if (action == 'q'):
         #     break
