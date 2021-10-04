@@ -12,18 +12,12 @@ def makeInitialPop(short, populationSize):
     population = []
     temp = ""
     while len(population) < populationSize:
-    #for x in range(populationSize):
         temp = ""
         for index in range(len(short)):
             gen = random.randint(0,1)
             temp += str(gen)
         if temp not in population:
             population.append(temp)
-            #print(temp)
-        #else:
-
-            #print("Woah no posers brah. You gotta be unique to join our crew!")
-
     return population
 
 
@@ -36,24 +30,18 @@ def roulette(short, longo, population, size):
         popFitness.append(specFit + totalFitness)
         totalFitness += specFit
 
-        #not finished
     while len(finalPop) < size:
         gen = random.randint(0,totalFitness)
         found = False
         cur = 0
         while found == False:
-            #print(cur)
-
             if cur >= size:
                 break
-            if gen <= popFitness[cur]: #and population[cur] not in finalPop:
-                #print("fitness at cur: ", popFitness[cur], " Random Gen:", gen)
+            if gen <= popFitness[cur]:
                 finalPop.append(population[cur])
                 found = True
             else:
                 cur += 1
-
-
     return finalPop
 
 
@@ -68,7 +56,6 @@ def fitness(short, longo, binary):
     match = 0
     matchNotFound = 0
     numOfOnes = len(candidate)
-    #print("num of ones",numOfOnes)
     z = 0
     for yam in range(numOfOnes):
         z = place
@@ -87,9 +74,7 @@ def fitness(short, longo, binary):
             break
 
 
-    #print("Match: ", match)
     fitnessRating = 3*match + (match * numOfOnes) - (5*(numOfOnes - match))
-    #fitnessRating = match + (match * numOfOnes) - (numOfOnes - match)*2
     if numOfOnes > match:
         fitnessRating = math.floor(fitnessRating* .25)
     if fitnessRating <= 0:
@@ -115,17 +100,9 @@ def ga(pool, k):
         else:
             crossPop.append(x)
             repoPop.append(x)
-            #print("Reproducing")
-    #print("crossPop len", len(crossPop), "len of repoPop", len(repoPop))
 
-    # if len(crossPop)%2 != 0:
-    #     t = len(repoPop) -1
-    #     crossPop.append(repoPop[t])
-    #     repoPop.pop()
     crossPop = crossover(crossPop, k)
     crossPop.extend(repoPop)
-
-    #print("New Pop Len: ",len(crossPop))
     return crossPop
 
 
@@ -140,19 +117,14 @@ def crossover(pool, k):
         parent1 = parent1[:point]
         sub2 = parent2[point:]
         parent2 = parent2[:point]
-        # print(f"{parent1} : {sub1}")
-        # print(f"{parent2} : {sub2}")
-        parent1 += sub2
         parent2 += sub1
 
         pool[i] = parent1
         pool[i+1] = parent2
 
         if random.random() * k < 1 / k: #pm = 1/k
-        #    print("Mutating")
             pool[i] = mutate(pool[i])
             pool[i+1] = mutate(pool[i+1])
-
     return pool
 
 def mutate(bin):
@@ -174,19 +146,14 @@ def printList(li):
     for i in li:
         print(i)
 
-# filter out valid sub sequences
 def filterPopulation(pool, short, longo):
     result = []
     decodedList = []
     filteredResult = []
-    # remove duplicates
     [result.append(x) for x in pool]# if x not in result]
-    # decode the binary strings in the list to "words"
     for x in result:
         decodedList.append(parseBinary(short, x))
-    # grab the only items that are sub sequences
     [filteredResult.append(x) for x in decodedList]# if isLcs(x, longo)]
-
     return filteredResult
 
 
@@ -197,6 +164,7 @@ def parseBinary(origin, binary):
         if c == '1':
             word += origin[i]
     return word
+
 # Determine whether or not str1 is a subsequence of str2
 def isLcs(str1, str2):
     it = iter(str2)
@@ -234,19 +202,14 @@ def main():
     k = len(short)
 
     population = makeInitialPop(short, populationSize)
-    #print(len(population), "---Pop size")
     finalPop = roulette(short, longo, population,populationSize-10)
-    # for x in finalPop:
-    #     print(x,"\n")
-    ##################################
+
     while True:
         candidates = []
         finalPop = roulette(short, longo,finalPop , (populationSize - 10))
         finalPop = ga(finalPop, k)
         candidates = filterPopulation(finalPop, short, longo)
-        #print(" ----- size of pop:", len(candidates))
         ### uncomment to view each generations possible lcs
-        #printList(candidates)
         identical += 1
 
         for x in candidates:
